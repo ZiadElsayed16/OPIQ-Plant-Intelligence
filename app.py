@@ -799,8 +799,15 @@ with st.sidebar:
 
     st.divider()
     st.markdown('<div class="sb-label">AI Engine Settings</div>', unsafe_allow_html=True)
+    secret_key = ""
+    try:
+        secret_key = st.secrets.get("GEMINI_API_KEY", "")
+    except Exception:
+        pass
+
     api_key = st.text_input(
         "Google Gemini API Key",
+        value=secret_key,
         type="password", placeholder="AIzaSy...",
         help="Paste your Google AI Studio key to activate live Gemini narration."
     )

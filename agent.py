@@ -8,6 +8,7 @@ Supports:
 import re
 import os
 from datetime import datetime
+from typing import Optional, List, Dict, Any, Tuple, Union
 import pandas as pd
 from analytics import (
     filter_data,
@@ -56,7 +57,7 @@ OUT_OF_SCOPE_MESSAGE = (
     "- *'Which machine has the lowest availability in the entire fleet?'*"
 )
 
-def is_query_in_scope(user_query: str, chat_history: list = None) -> bool:
+def is_query_in_scope(user_query: str, chat_history: Optional[List[Dict[str, Any]]] = None) -> bool:
     """Checks if user's question is within cement plant stoppage scope."""
     q = user_query.lower().strip()
     if len(q) < 2:
@@ -85,7 +86,7 @@ def is_query_in_scope(user_query: str, chat_history: list = None) -> bool:
             
     return False
 
-def extract_target_plant(query_lower: str, chat_history: list = None, default_plant: str = None) -> str:
+def extract_target_plant(query_lower: str, chat_history: Optional[List[Dict[str, Any]]] = None, default_plant: Optional[str] = None) -> str:
     """Extracts plant context (Cleopatra Plant, BMIC Plant, or All Plants)."""
     if "cleopatra" in query_lower:
         return "Cleopatra Plant"
@@ -105,7 +106,7 @@ def extract_target_plant(query_lower: str, chat_history: list = None, default_pl
 
     return default_plant or "All Plants"
 
-def extract_target_machine(query_lower: str, chat_history: list = None, df_machines: list = None) -> str:
+def extract_target_machine(query_lower: str, chat_history: Optional[List[Dict[str, Any]]] = None, df_machines: Optional[List[str]] = None) -> Optional[str]:
     """Extracts machine name from current query, or inherits from previous turns."""
     aliases = {
         "cement mill a": "W.CEMENT MILL (A)",
@@ -141,7 +142,7 @@ def extract_target_machine(query_lower: str, chat_history: list = None, df_machi
 
     return None
 
-def extract_date_range(query_lower: str, chat_history: list = None):
+def extract_date_range(query_lower: str, chat_history: Optional[List[Dict[str, Any]]] = None) -> Tuple[Optional[str], Optional[str]]:
     """Extracts date range from current query or previous conversation turns."""
     month_map = {
         "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
@@ -182,7 +183,15 @@ def extract_date_range(query_lower: str, chat_history: list = None):
 
     return None, None
 
-def answer_query(user_query: str, df: pd.DataFrame, api_key: str = None, chosen_model: str = "auto", chat_history: list = None, default_plant: str = None, active_machines: list = None) -> str:
+def answer_query(
+    user_query: str,
+    df: pd.DataFrame,
+    api_key: Optional[str] = None,
+    chosen_model: str = "auto",
+    chat_history: Optional[List[Dict[str, Any]]] = None,
+    default_plant: Optional[str] = None,
+    active_machines: Optional[List[str]] = None
+) -> str:
     """
     Main entrypoint for answering multi-plant questions with full conversational memory.
     """
@@ -397,11 +406,11 @@ Format your answer professionally in markdown with bullet points and clear opera
         last_err = e
 
     try:
-        import google.generativeai as legacy_genai
-        legacy_genai.configure(api_key=api_key.strip())
+        import google.generativeai as legacy_genai  # type: ignore
+        legacy_genai.configure(api_key=api_key.strip())  # type: ignore
         for m in candidates:
             try:
-                model = legacy_genai.GenerativeModel(m)
+                model = legacy_genai.GenerativeModel(m)  # type: ignore
                 response = model.generate_content(full_prompt)
                 if response and response.text:
                     return response.text + f"\n\n---\n*✨ Synthesized live using Google Gemini ({m}) via Google AI Studio*"

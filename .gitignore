@@ -42,3 +42,7 @@ ENV/
 *.tmp
 .DS_Store
 Thumbs.db
+.pytest_cache/
+*.db-journal
+*.db-wal
+*.db-shm

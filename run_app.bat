@@ -6,5 +6,9 @@ echo URL: http://localhost:8501
 echo =======================================================
 cd /d "%~dp0"
 set PYTHONIOENCODING=utf-8
-"C:\Users\ziade\AppData\Local\Programs\Python\Python39\python.exe" -m streamlit run app.py --server.port 8501 --browser.gatherUsageStats false
+if exist ".venv\Scripts\python.exe" (
+    ".venv\Scripts\python.exe" -m streamlit run app.py --server.port 8501 --browser.gatherUsageStats false
+) else (
+    "C:\Users\ziade\AppData\Local\Programs\Python\Python39\python.exe" -m streamlit run app.py --server.port 8501 --browser.gatherUsageStats false
+)
 pause
